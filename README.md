@@ -153,7 +153,9 @@ Download pre-trained model to checkpoints:
 $ cd /path/to/DynamicHyperNet
 $ mkdir checkpoints
 $ cd checkpoints
-$ wget https://github.com/yichengsu/ICIP2020-WSP IQA/releases/download/v0.1/checkpoint.pth.tar
+
+Download the pre-trained model from [Google Driver](https://drive.google.com/file/d/15WuMQJUOOdpodnKuBfZdurV1W3bg9c7Q/view?usp=sharing) and unzip it.
+
 $ cd ..
 $ CUDA_VISIBLE_DEVICES=0 python main.py --data /path to/KonIQ-10k -e -p -a koniq10k_train_3090
 ```
