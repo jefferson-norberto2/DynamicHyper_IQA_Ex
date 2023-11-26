@@ -140,10 +140,8 @@ It's worth noting that if you training from scratch, the modifications are neces
 You can evaluate KonIQ-10k:
 
 ```
-$ CUDA_VISIBLE_DEVICES=0 python main.py --data /path to/KonIQ-10k -e -p -a koniq10k_train_3090
+$ CUDA_VISIBLE_DEVICES=0 python main.py --data /path to/KonIQ-10k -e -p -a checkpoint_name
 ```
-
-
 
 ## Pre-trained Model
 
@@ -159,7 +157,8 @@ Download the pre-trained model from [Google Driver](https://drive.google.com/fil
 
 ```
 $ cd ..
-$ CUDA_VISIBLE_DEVICES=0 python main.py --data /path to/KonIQ-10k -e -p -a koniq10k_train_3090
+$ python main.py --data /path to/KonIQ-10k -e -p -a koniq10k_train_3090
+$ python cross_test.py --data /path to/live_c/ --checkpoint koniq10k_train_3090 --dataset livec 
 ```
 
 You can use pre-trained model to get results as follow:
