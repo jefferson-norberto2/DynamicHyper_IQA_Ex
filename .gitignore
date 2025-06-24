@@ -1,0 +1,5 @@
+# builds and caches
+*.pyc
+*.o
+*.so
+*.egg

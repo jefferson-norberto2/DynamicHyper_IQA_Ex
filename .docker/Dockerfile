@@ -1,0 +1,43 @@
+FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
+
+# Evita prompts interativos
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Atualiza e instala ferramentas básicas
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    git \
+    wget \
+    build-essential \
+    unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Instala dependências Python
+RUN pip install --upgrade pip && \
+    pip install timm==0.4.5 pyyaml ipdb && \
+    pip cache purge
+
+# Copia seu projeto para dentro do container
+COPY ./ /workspace/
+
+# Baixa e compila o Apex
+RUN cd /workspace/ddfnet && \
+    wget https://github.com/NVIDIA/apex/archive/refs/tags/25.04.zip && \
+    unzip 25.04.zip && \
+    mv apex-25.04 apex && \
+    cd apex && \
+    python setup.py install --cpp_ext --cuda_ext && \
+    cd ../ && rm -rf 25.04.zip apex
+
+# Compila os filtros dinâmicos
+RUN cd /workspace/ddfnet/ddf/ && \
+    python setup.py install && \
+    mv build/lib*/* .
+
+# Cria um usuário não-root
+RUN useradd -ms /bin/bash devuser
+USER devuser
+WORKDIR /workspace
+
+CMD [ "bash" ]
