@@ -3,6 +3,10 @@ FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
 # Evita prompts interativos
 ENV DEBIAN_FRONTEND=noninteractive
 
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+
 # Atualiza e instala ferramentas básicas
 RUN apt update && \
     apt install -y --no-install-recommends \
@@ -30,14 +34,10 @@ RUN cd /workspace/ddfnet && \
     python setup.py install --cpp_ext --cuda_ext && \
     cd ../ && rm -rf 25.04.zip apex
 
-# Compila os filtros dinâmicos
-RUN cd /workspace/ddfnet/ddf/ && \
-    python setup.py install && \
-    mv build/lib*/* .
-
-# Cria um usuário não-root
-RUN useradd -ms /bin/bash devuser
-USER devuser
+COPY .docker/start.sh /workspace/start.sh
+RUN chmod +x /workspace/start.sh
+    
 WORKDIR /workspace
 
-CMD [ "bash" ]
+ENTRYPOINT ["/workspace/start.sh"]
+CMD ["bash"]
