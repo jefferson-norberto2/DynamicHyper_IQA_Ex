@@ -17,9 +17,11 @@ RUN apt update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+COPY ./requirements.txt /workspace/requirements.txt
+
 # Instala dependências Python
 RUN pip install --upgrade pip && \
-    pip install timm==0.4.5 pyyaml ipdb && \
+    pip install -r /workspace/requirements.txt \
     pip cache purge
 
 # Copia seu projeto para dentro do container

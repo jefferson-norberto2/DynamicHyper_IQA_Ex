@@ -1,0 +1,13 @@
+torch
+torchvision
+torchaudio
+timm==0.4.5
+pyyaml
+ipdb
+numpy
+pandas
+openpyxl
+scipy
+scikit-learn
+tensorboard
+wandb
