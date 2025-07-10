@@ -1,12 +1,10 @@
 import os
 import argparse
     
-from scipy.io import savemat
 import numpy as np
 import pandas as pd
 import torch
 import torch.utils.data as Data
-import scipy
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import mean_squared_error
 

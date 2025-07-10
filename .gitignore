@@ -3,3 +3,7 @@
 *.o
 *.so
 *.egg
+datasets
+checkpoints
+__pycache__
+runs

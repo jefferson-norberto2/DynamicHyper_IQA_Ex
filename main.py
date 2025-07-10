@@ -12,11 +12,11 @@ import torch.multiprocessing as mp
 import torch.nn.parallel
 import torch.optim
 import torch.utils.data as Data
-import torch.utils.data.distributed
+# import torch.utils.data.distributed
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import mean_squared_error
 # import pretty_errors
-# from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 # from tensorboardx import SummaryWriter
 
 
@@ -127,9 +127,9 @@ def main():
         args.order_file = './orders_bid.csv'
         assert os.path.exists(args.order_file), 'order file not exists, please run generate_order.py'
 
-    if ('KonIQ' in args.data):
+    if ('koniq' in args.data):
         # subfolder with images
-        args.images_folder = os.path.join(args.data, '1024x768')
+        args.images_folder = os.path.join(args.data, '512x384')
         assert os.path.exists(args.images_folder), 'images folder not exists'
 
         # subfile with mos detail
@@ -204,38 +204,12 @@ def main_worker(gpu, ngpus_per_node, args):
         print("=> using pre-trained model.")
         path = 'checkpoints/{}.pth.tar'.format(args.arch)
         state_dict = torch.load(path, map_location='cpu')['state_dict']
-        # model = IQANet_DDF_Hyper()
-        # model = NewComplex()
-        # model = ComplexNet()
-        # model = IQANet_wsp()
-        # model = IQANet_HyperWSP()
-        # model = IQANet_DDF_Hyper(256).cuda()  # feature size: 16 for LIVEC
         model = IQANet_DDF_Hyper(128, 24, 192, 64).cuda() 
 
         model.load_state_dict(state_dict)
     else:
         print("=> creating model (gpu:{})".format(gpu))
-        # model = Baseline2()
-        # model = RealNet()
-        # model = ComplexNetNoDF()
-        # model = ComplexNet()
-        # model = NewComplex()
-        # model = Test()
-        # model = IQANet()
-        # model = IQANet_wsp()
-        # model = IQANet_HyperWSP()
-        # model = IQANet_DDF_Hyper(128, 24, 2048, 192, 64, 24).cuda()  # feature size: 16 for LIVEC
-        # model = IQANet_DDF_Hyper(256).cuda() 
         model = IQANet_DDF_Hyper(128, 24, 192, 64).cuda() 
-        
-        # model = IQANet_DDF_Hyper().cuda() 
-        
-        # model = IQANet_DDF_Hyper(128, 12, 96, 32).cuda() 
-        # model = IQANet_DDF_Hyper(128, 12, 192, 64).cuda() 
-        # model = IQANet_DDF_Hyper(128, 24, 192).cuda() 
-        # model = IQANet_DDF_Hyper(64, 24, 48, 16).cuda() #0809不行
-        # model = IQANet_DDF_Hyper(64, 24, 96, 32).cuda() 
-        # model = IQANet_DDF_Hyper(64, 16, 256, 64).cuda() 
 
 
     torch.cuda.set_device(gpu)
@@ -244,11 +218,6 @@ def main_worker(gpu, ngpus_per_node, args):
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[gpu])
 
     criterion = HuberLoss(1/9).cuda(gpu)
-    # criterion = HuberRankLoss(1/9).cuda(gpu)
-    # c2 = L1RankLoss()
-    # criterion = HuberLoss(1/30).cuda(gpu)
-    # c2 = spearmanr()
-    # c2 = SpearmanLoss(sorter_type, seq_len=None, sorter_state_dict=None)
 
     if  ('deep' in args.comment):
         encoding_params = list(map(id, model.encoding_layer.parameters()))
@@ -263,28 +232,9 @@ def main_worker(gpu, ngpus_per_node, args):
             {'params': other_params}]
         optimizer = torch.optim.SGD(paras, lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
     else:
-        # res_params1 = list(map(id, model.resnet101.parameters()))
-        # res_params0 = list(map(id, model.resnet101_freeze.parameters()))
-        # other_params = filter(lambda p: id(p) not in res_params0, model.parameters())
-        # paras = [{'params': model.resnet101.parameters(), 'lr': args.lr * args.lr_ratio},
-        #     {'params': other_params}]
-        # optimizer = torch.optim.SGD(model.parameters(), args.lr,
-        #                         momentum=args.momentum, weight_decay=args.weight_decay)
-        # optimizer = optimizer = torch.optim.Adagrad(model.parameters(), args.lr, weight_decay=args.weight_decay)
-        # optimizer = torch.optim.ASGD(model.parameters(), lr=args.lr, lambd=0.0001, alpha=0.75, t0=1000000.0, weight_decay=0)
-        # optimizer = torch.optim.Adagrad(model.parameters(), lr=args.lr, lr_decay=0, weight_decay=args.weight_decay)
-        # optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, rho=0.9, eps=1e-06, weight_dec3ay=args.weight_decay)
-        # optimizer = torch.optim.RMSprop(model.parameters(), lr=args.lr, alpha=0.99, eps=1e-08, weight_decay=args.weight_decay, momentum=0, centered=False)
-        # optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), eps=1e-08, weight_decay=args. weight_decay)
-        # optimizer = torch.optim.AdamW(model.parameters(),lr=args.lr,betas=(0.9,0.999),eps=1e-08,weight_decay=0.01,amsgrad=False)
-        # optimizer = torch.optim.AdamW(model.parameters(),lr=args.lr,betas=(0.9,0.999),eps=1e-05,weight_decay=0.3,amsgrad=False)
         optimizer = torch.optim.AdamW(model.parameters(),lr=args.lr,betas=(0.9,0.999),eps=1e-05,weight_decay=0.010,amsgrad=False)
-        # optimizer = torch.optim.SGD(model.parameters(), args.lr, momentum=0.9, weight_decay=5e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=7, factor=0.1, verbose=True)
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs, eta_min=1e-07)
-    
-    # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30,50,70], gamma=0.1)
 
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=7, factor=0.1)
     cudnn.benchmark = True
 
     # Data loading
@@ -302,12 +252,12 @@ def main_worker(gpu, ngpus_per_node, args):
                                     batch_size=args.batch_size, shuffle=False,
                                     num_workers=args.workers, pin_memory=True)
 
-    if ('kadid10k' in args.data):
-        train_dataset = Kadid10KDataSet(mos_df_train, args.images_folder)
+    # if ('kadid10k' in args.data):
+    #     train_dataset = Kadid10KDataSet(mos_df_train, args.images_folder)
 
-        val_loader = Data.DataLoader(dataset=Kadid10KDataSet(mos_df_test, args.images_folder, False),
-                                    batch_size=args.batch_size, shuffle=False,
-                                    num_workers=args.workers, pin_memory=True)
+    #     val_loader = Data.DataLoader(dataset=Kadid10KDataSet(mos_df_test, args.images_folder, False),
+    #                                 batch_size=args.batch_size, shuffle=False,
+    #                                 num_workers=args.workers, pin_memory=True)
 
     if ('ChallengeDB' in args.data):
         train_dataset = LiveCDataSet(mos_df_train, args.images_folder)
@@ -317,26 +267,26 @@ def main_worker(gpu, ngpus_per_node, args):
                                     num_workers=args.workers, pin_memory=True)
 
 
-    if ('BID' in args.data):
-        train_dataset = BidDataSet(mos_df_train, args.images_folder)
+    # if ('BID' in args.data):
+    #     train_dataset = BidDataSet(mos_df_train, args.images_folder)
 
-        val_loader = Data.DataLoader(dataset=BidDataSet(mos_df_test, args.images_folder, False),
-                                    batch_size=1, shuffle=False,
-                                    num_workers=args.workers, pin_memory=True)
+    #     val_loader = Data.DataLoader(dataset=BidDataSet(mos_df_test, args.images_folder, False),
+    #                                 batch_size=1, shuffle=False,
+    #                                 num_workers=args.workers, pin_memory=True)
     
-    if ('KonIQ' in args.data):
+    if ('koniq' in args.data):
         train_dataset = KonIQ10KDataset(mos_df_train, args.images_folder)
 
         val_loader = Data.DataLoader(dataset=KonIQ10KDataset(mos_df_test, args.images_folder, False),
                                     batch_size=args.batch_size, shuffle=False,
                                     num_workers=args.workers, pin_memory=True)
 
-    if ('SPAQ' in args.data):
-        train_dataset = SPAQDataSet(mos_df_train, args.images_folder)
+    # if ('SPAQ' in args.data):
+    #     train_dataset = SPAQDataSet(mos_df_train, args.images_folder)
 
-        val_loader = Data.DataLoader(dataset=SPAQDataSet(mos_df_test, args.images_folder, False),
-                                    batch_size=1, shuffle=False,
-                                    num_workers=args.workers, pin_memory=True)
+    #     val_loader = Data.DataLoader(dataset=SPAQDataSet(mos_df_test, args.images_folder, False),
+    #                                 batch_size=1, shuffle=False,
+    #                                 num_workers=args.workers, pin_memory=True)
 
     if ('csiq' in args.data):
         train_dataset = CSIQDataSet(mos_df_train, args.images_folder)
@@ -373,21 +323,6 @@ def main_worker(gpu, ngpus_per_node, args):
         # evaluate on validation set
         loss, res = validate(val_loader, model, criterion, epoch, writer, args)
         scheduler.step(loss)
-        # scheduler.step()
-
-        # if gpu == 0 and (epoch == 200):
-        #     is_best = res[0] > best_res[0]
-        #     if is_best:
-        #         best_res = res
-
-        #     # save model after training
-        #     save_checkpoint({
-        #         'epoch': epoch + 1,
-        #         'state_dict': model.state_dict(),
-        #         'optimizer': optimizer.state_dict(),
-        #         'best_res': best_res,
-        #         'args': args,
-        #     }, is_best, 'checkpoints/{}'.format(args.timestep + args.comment + str(epoch) + 'epochs'))
        
         if gpu == 0:
             is_best = res[0] > best_res[0]

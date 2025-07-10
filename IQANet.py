@@ -1,14 +1,12 @@
 # from timm.models import create_model, apply_test_time_pool, load_checkpoint, is_model, list_models
 import torch
 import torch.nn as nn
-import torchvision.models as models
 from torch.nn import functional as F
 
 # register models
 from ddfnet.ddf.ddf import DDFPack
 
-from Res2Net.res2net import res2net50, res2net101_26w_4s
-from Res2Net.res2net_v1b import res2net101_v1b_26w_4s, res2net50_v1b_26w_4s
+from Res2Net.res2net import res2net101_26w_4s
 
 def conv(in_channel, out_channel, kernel_size=3, stride=1, dilation=1, isReLU=True):
     if isReLU:
