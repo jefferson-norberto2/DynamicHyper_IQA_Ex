@@ -17,29 +17,25 @@ RUN apt update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./requirements.txt /workspace/requirements.txt
+COPY ./requirements.txt /dynamic_iqa_ex/requirements.txt
 
 # Instala dependências Python
 RUN pip install --upgrade pip && \
-    pip install -r /workspace/requirements.txt \
+    pip install -r /dynamic_iqa_ex/requirements.txt \
     pip cache purge
 
 # Copia seu projeto para dentro do container
-COPY ./ /workspace/
+COPY ./ /dynamic_iqa_ex/
 
 # Baixa e compila o Apex
-RUN cd /workspace/ddfnet && \
+RUN cd /dynamic_iqa_ex/ddfnet && \
     wget https://github.com/NVIDIA/apex/archive/refs/tags/25.04.zip && \
     unzip 25.04.zip && \
     mv apex-25.04 apex && \
     cd apex && \
     python setup.py install --cpp_ext --cuda_ext && \
     cd ../ && rm -rf 25.04.zip apex
-
-COPY .docker/start.sh /workspace/start.sh
-RUN chmod +x /workspace/start.sh
     
-WORKDIR /workspace
+WORKDIR /dynamic_iqa_ex
 
-ENTRYPOINT ["/workspace/start.sh"]
 CMD ["bash"]
