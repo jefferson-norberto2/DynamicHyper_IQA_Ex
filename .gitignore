@@ -3,6 +3,5 @@
 *.o
 *.egg
 datasets
-checkpoints
 __pycache__
-runs
+
