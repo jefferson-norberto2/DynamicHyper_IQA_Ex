@@ -1,7 +1,6 @@
 # builds and caches
 *.pyc
 *.o
-*.so
 *.egg
 datasets
 checkpoints

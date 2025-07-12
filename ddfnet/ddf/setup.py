@@ -21,7 +21,6 @@ def make_cuda_ext(name, sources, sources_cuda=[]):
         sources += sources_cuda
     else:
         print(f'Compiling {name} without CUDA')
-        raise(Exception('So build isso com cuda'))
         extension = CppExtension
 
     return extension(
