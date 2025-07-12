@@ -9,6 +9,53 @@ This repository is the [PyTorch](http://pytorch.org)  official implementation of
 Fig. Architecture of the proposed net
 </p>
 
+## Docker support
+
+This repository has a docker container support, using a official docker engine instalation from https://docs.docker.com/engine/install/ubuntu/ and using a official NVIDIA container toolkit instalation from https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html. 
+
+The Dockerfile is configured to use a CUDA 12.1 or later from your host machine. To check your CUDA version run in your terminal
+```bash
+nvidia-smi
+```
+
+The ddf filter and nvidia apex was builded to this image, so don't need build again, but if you use a less CUDA version you need change the image in first line on Dockefile to a image that has support. Images that finish with -devel, like pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel, need to be used, because has a nvcc compiler to build necessary dependecies.
+
+### Build image
+
+To build this image you will need:
+- First install docker engine
+- Second install NVIDIA container toolkit
+- Thrid open your terminal on this root project
+- Last run tha command below in your opened terminal
+
+```bash
+sh .docker/build.sh
+```
+
+### Run docker image
+
+To run the docker image you need build first, and after this you just need run in your terminal on this root project:
+
+```bash
+sh .docker/run.sh
+```
+
+To enter in the running  container use:
+
+```bash
+docker attach dynamic_iqa_ex
+```
+
+### Build ddf filters (If change base image on Dockerfile)
+
+After run docker image and attach, you just need run:
+
+```bash
+sh .docker/compile_ddf.sh
+```
+
+This command will build the dynamic filters to a new docker image with a another CUDA version. 
+
 
 ## Install and Requirements
 
@@ -121,12 +168,14 @@ And Live-itW has directory structure as following:
 
 You can easily train the model using the command line  for one data partition:
 
+```bash
+CUDA_VISIBLE_DEVICES=0 python main.py --data Datasets/koniq10k --tensorboard --comment Training -b 8 --epochs 200 --lr 1e-2 -j 1 --train-size 8200
 ```
-$ CUDA_VISIBLE_DEVICES=0 python main.py /path/to/koniq10k --tensorboard --comment Training -b 5 --epochs 200 --lr 1e-2
 
 or
 
-$ python main.py --data /home/Joanne/IQA_datasets/tid2013 --comment tid2013_train_3090_ -b 25 --train-size 2400 --epochs 300 --lr 1e-2 --lr_ratio 1e1 
+```bash
+python main.py --data /home/Joanne/IQA_datasets/tid2013 --comment tid2013_train_3090_ -b 25 --train-size 2400 --epochs 300 --lr 1e-2 --lr_ratio 1e1 
 ```
 
 Many rounds can be conducted according to differnt random train-test data seperation.

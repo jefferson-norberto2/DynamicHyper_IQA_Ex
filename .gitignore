@@ -2,6 +2,7 @@
 *.pyc
 *.o
 *.egg
-datasets
+Datasets
 __pycache__
-
+runs
+checkpoints
