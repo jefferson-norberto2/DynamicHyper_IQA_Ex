@@ -24,11 +24,9 @@ RUN pip install --upgrade pip && \
     pip install -r /dynamic_iqa_ex/requirements.txt \
     pip cache purge
 
-# Copia seu projeto para dentro do container
-COPY ./ /dynamic_iqa_ex/
-
 # Baixa e compila o Apex
-RUN cd /dynamic_iqa_ex/ddfnet && \
+RUN mkdir -p /ddfnet && \
+    cd /ddfnet && \
     wget https://github.com/NVIDIA/apex/archive/refs/tags/25.04.zip && \
     unzip 25.04.zip && \
     mv apex-25.04 apex && \

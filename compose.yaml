@@ -16,8 +16,5 @@ services:
         source: ${HOME}/Dev/Datasets
         target: /dynamic_iqa_ex/Datasets
       - type: bind
-        source: ./checkpoints
-        target: /dynamic_iqa_ex/checkpoints
-      - type: bind
-        source: ./runs
-        target: /dynamic_iqa_ex/runs
+        source: ./
+        target: /dynamic_iqa_ex
