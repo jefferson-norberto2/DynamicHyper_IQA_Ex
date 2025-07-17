@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
+FROM pytorch/pytorch:2.2.2-cuda11.8-cudnn8-devel
 
 # Evita prompts interativos
 ENV DEBIAN_FRONTEND=noninteractive

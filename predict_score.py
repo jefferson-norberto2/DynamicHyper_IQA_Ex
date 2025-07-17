@@ -46,8 +46,8 @@ def predict_score(image_path: str, model_path: str):
         return output.squeeze().cpu().item()
 
 if __name__ == "__main__":
-    checkpoint_path = 'checkpoints/20250712-132347Training60epochs.pth.tar'
-    image_path = 'img/img2.jpg'
+    checkpoint_path = 'checkpoints/20250715-112553Training104epochs.pth.tar'
+    image_path = 'img/img1.jpg'
 
     print(f"Predicting score for image: {image_path}")
     score = predict_score(image_path, checkpoint_path)

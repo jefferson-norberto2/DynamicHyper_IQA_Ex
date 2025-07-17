@@ -24,7 +24,7 @@ class KonIQ10KDataset(Dataset):
         self.mos_df = mos_df
         self.len = len(self.mos_df)
         self.distribution = dist
-        self.image_size = (384, 512)
+        self.image_size = (768, 1024)
 
         if training:
             self.transforms = transforms.Compose([
