@@ -27,11 +27,11 @@ from IQANet import IQANet_DDF_Hyper, TargetNet
 
 parser = argparse.ArgumentParser(description='BLIND NATURAL IMAGE QUALITY PREDICTION USING '
                                 'CONVOLUTIONAL NEURAL NETWORKS AND WEIGHTED SPATIAL POOLING')
-parser.add_argument('--data', metavar='DIR',
+parser.add_argument('--data', default='./Datasets/koniq10k', metavar='DIR',
                     help='path to dataset')
-parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
+parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
                     help='number of data loading workers (default: 2)')
-parser.add_argument('--epochs', default=100, type=int, metavar='N',
+parser.add_argument('--epochs', default=70, type=int, metavar='N',
                     help='number of total epochs to run (default: 70)')
 parser.add_argument('-b', '--batch-size', default=32, type=int, metavar='N',
                     help='mini-batch size (default: 32), this is the total '

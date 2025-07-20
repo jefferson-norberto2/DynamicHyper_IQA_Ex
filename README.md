@@ -169,7 +169,7 @@ And Live-itW has directory structure as following:
 You can easily train the model using the command line  for one data partition:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python main.py --data Datasets/koniq10k --tensorboard --comment Training -b 8 --epochs 200 --lr 1e-2 -j 1 --train-size 8200
+CUDA_VISIBLE_DEVICES=0 python main.py --data Datasets/koniq10k --tensorboard --comment Training -b 32 --epochs 50 --lr 1e-2 --train-size 8200
 ```
 
 or

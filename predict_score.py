@@ -2,6 +2,13 @@ from IQANet import IQANet_DDF_Hyper, TargetNet
 import torch
 from PIL import Image
 from torchvision import transforms
+import argparse
+
+parser = argparse.ArgumentParser(description='BLIND NATURAL IMAGE QUALITY PREDICTION USING '
+                                'CONVOLUTIONAL NEURAL NETWORKS AND WEIGHTED SPATIAL POOLING')
+
+parser.add_argument('--image_path', '-i', type=str, default='img/01.png', help='Path to the input image')
+parser.add_argument('--model_path', '-m', type=str, default='checkpoints/training_48_epochs.pth.tar', help='Path to the model checkpoint')
 
 def load_image(image_path: str):
     image = Image.open(image_path).convert('RGB')
@@ -46,10 +53,12 @@ def predict_score(image_path: str, model_path: str):
         return output.squeeze().cpu().item()
 
 if __name__ == "__main__":
-    checkpoint_path = 'checkpoints/20250715-112553Training104epochs.pth.tar'
-    image_path = 'img/img1.jpg'
+    args = parser.parse_args()
+
+    checkpoint_path = args.model_path
+    image_path = args.image_path
 
     print(f"Predicting score for image: {image_path}")
     score = predict_score(image_path, checkpoint_path)
-    print(f"Predicted score: {score}")
+    print(f"Predicted score: {score:.2f}")
     

@@ -9,10 +9,11 @@ ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
 
 # Atualiza e instala ferramentas básicas
 RUN apt update && \
-    apt install -y --no-install-recommends \
+    apt install -y \
     git \
     wget \
     build-essential \
+    nano \
     unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
