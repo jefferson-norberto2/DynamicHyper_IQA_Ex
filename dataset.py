@@ -13,7 +13,7 @@ class KonIQ10KDataset(Dataset):
     load KonIQ-10K dataset
     """
 
-    def __init__(self, mos_df, images_folder, training=True, dist=False):
+    def __init__(self, mos_df, images_folder, image_shape, training=True, dist=False):
         """
         Args:
             mos_df (DataFrame): mos detail about KonIQ-10k
@@ -24,7 +24,7 @@ class KonIQ10KDataset(Dataset):
         self.mos_df = mos_df
         self.len = len(self.mos_df)
         self.distribution = dist
-        self.image_size = (768, 1024)
+        self.image_size = image_shape
 
         if training:
             self.transforms = transforms.Compose([

@@ -61,8 +61,18 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                         'multi node data parallel training')
 parser.add_argument('--th', default=0, type=int,
                     help='Use which ones in order file to train (default: 0)')
-parser.add_argument('--train-size', default=2400, type=int, metavar='SIZE',
-                    help='how many files are used for training (default: 2400)')
+parser.add_argument('--train-size', default=8200, type=int, metavar='SIZE',
+                    help='how many files are used for training (default: 8200)')
+
+parser.add_argument(
+    "--image-shape",
+    nargs=2,
+    type=int,
+    metavar=("WIDTH", "HEIGHT"),
+    default=(512, 384),
+    help="Image size (hidwth height)"
+)
+
 parser.add_argument('--tensorboard', action='store_true',
                     help='Use Tensorboard to record results')
 parser.add_argument('--comment', default='', type=str,
@@ -275,9 +285,9 @@ def main_worker(gpu, ngpus_per_node, args):
     #                                 num_workers=args.workers, pin_memory=True)
     
     if ('koniq' in args.data):
-        train_dataset = KonIQ10KDataset(mos_df_train, args.images_folder)
+        train_dataset = KonIQ10KDataset(mos_df_train, args.images_folder, args.image_shape)
 
-        val_loader = Data.DataLoader(dataset=KonIQ10KDataset(mos_df_test, args.images_folder, False),
+        val_loader = Data.DataLoader(dataset=KonIQ10KDataset(mos_df_test, args.images_folder, args.image_shape, False),
                                     batch_size=args.batch_size, shuffle=False,
                                     num_workers=args.workers, pin_memory=True)
 
