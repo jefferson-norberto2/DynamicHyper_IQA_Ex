@@ -31,8 +31,8 @@ parser.add_argument('--data', default='./Datasets/koniq10k', metavar='DIR',
                     help='path to dataset')
 parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
                     help='number of data loading workers (default: 2)')
-parser.add_argument('--epochs', default=70, type=int, metavar='N',
-                    help='number of total epochs to run (default: 70)')
+parser.add_argument('--epochs', default=50, type=int, metavar='N',
+                    help='number of total epochs to run (default: 50)')
 parser.add_argument('-b', '--batch-size', default=32, type=int, metavar='N',
                     help='mini-batch size (default: 32), this is the total '
                         'batch size of all GPUs when using Distributed Data Parallel')
@@ -70,7 +70,7 @@ parser.add_argument(
     type=int,
     metavar=("WIDTH", "HEIGHT"),
     default=(512, 384),
-    help="Image size (hidwth height)"
+    help="Image size (width, height)"
 )
 
 parser.add_argument('--tensorboard', action='store_true',
@@ -339,7 +339,7 @@ def main_worker(gpu, ngpus_per_node, args):
             if is_best:
                 best_res = res
 
-            if epoch % 2 == 0:
+            if epoch % 2 == 0 or is_best:
                 # save model after training
                 save_checkpoint({
                     'epoch': epoch + 1,
@@ -347,7 +347,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     'optimizer': optimizer.state_dict(),
                     'best_res': best_res,
                     'args': args,
-                }, is_best, 'checkpoints/{}'.format(args.timestep + args.comment + str(epoch) + 'epochs'))
+                }, is_best, f'checkpoints/{args.comment}_{epoch}_epochs')
 
     if writer:
         writer.flush()

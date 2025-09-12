@@ -21,17 +21,7 @@ def load_image(image_path: str):
 
     return image.cuda()
 
-def predict_score(image_path: str, model_path: str):
-    # Load the model state
-    state_dict = torch.load(model_path, map_location='cpu')['state_dict']
-    
-    # Create IQANet_DDF_Hyper model
-    model = IQANet_DDF_Hyper(128, 24, 192, 64).cuda()
-    
-    # Load the state dictionary into the model
-    model.load_state_dict(state_dict, strict=False)
-    model.eval()
-
+def predict_score(image_path: str, model: IQANet_DDF_Hyper):
     # Load and preprocess the image
     image = load_image(image_path)
 
@@ -41,10 +31,6 @@ def predict_score(image_path: str, model_path: str):
 
         # Create TargetNet using the parameters
         model_target = TargetNet(paras).cuda()
-        
-        # Remove gradients for TargetNet parameters
-        for param in model_target.parameters():
-            param.requires_grad = False
 
         # Pass the input vector through TargetNet
         output = model_target(paras['target_in_vec'])
@@ -58,7 +44,17 @@ if __name__ == "__main__":
     checkpoint_path = args.model_path
     image_path = args.image_path
 
+    # Load the model state
+    state_dict = torch.load(checkpoint_path, map_location='cpu')['state_dict']
+    
+    # Create IQANet_DDF_Hyper model
+    model = IQANet_DDF_Hyper(128, 24, 192, 64).cuda()
+    
+    # Load the state dictionary into the model
+    model.load_state_dict(state_dict, strict=False)
+    model.eval()
+
     print(f"Predicting score for image: {image_path}")
-    score = predict_score(image_path, checkpoint_path)
+    score = predict_score(image_path, model)
     print(f"Predicted score: {score:.2f}")
     

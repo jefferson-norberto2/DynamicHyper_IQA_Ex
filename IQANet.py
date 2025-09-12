@@ -218,7 +218,8 @@ class TargetNet(nn.Module):
         q = self.l1(x)
         q = self.l2(q)
         q = self.l3(q).squeeze(2).squeeze(2)
-
+        q = torch.sigmoid(q)
+        
         return q
 
 
