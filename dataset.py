@@ -24,11 +24,23 @@ class KonIQ10KDataset(Dataset):
         self.mos_df = mos_df
         self.len = len(self.mos_df)
         self.distribution = dist
+        self.image_size = image_shape
 
-        self.transforms = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
+        if training:
+            self.transforms = transforms.Compose([
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.RandomRotation(3, expand=True),
+                transforms.CenterCrop(self.image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+        else:
+            self.transforms = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.CenterCrop(self.image_size),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
 
         self.images_folder = images_folder
 
