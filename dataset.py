@@ -57,7 +57,7 @@ class KonIQ10KDataset(Dataset):
                                 mos_detail.c3, mos_detail.c4, mos_detail.c5)
             label = tuple([m/mos_detail.c_total for m in mos_distribution])
         else:
-            label = [mos_detail.MOS / 5]
+            label = [(mos_detail.MOS -1) / 4]
         return image, torch.Tensor(label)
 
 
@@ -158,7 +158,9 @@ class CSIQDataSet(Dataset):
 
     def __getitem__(self, index):
         mos_detail = self.mos_df.iloc[index]
-        image_path = os.path.join(self.images_folder, '{}.{}.{}.png'.format(mos_detail[0], mos_detail[2], str(int(mos_detail[3]))))
+        mos_img:str = mos_detail.iloc[0]
+        mos_img = mos_img.split('/')
+        image_path = os.path.join(f'{self.images_folder}/{mos_img[2]}/{mos_img[3]}')
         image = self.transforms(Image.open(image_path))
-        label = [mos_detail[1]]
+        label = [mos_detail.iloc[3]]
         return image, torch.Tensor(label)

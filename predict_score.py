@@ -7,8 +7,8 @@ import argparse
 parser = argparse.ArgumentParser(description='BLIND NATURAL IMAGE QUALITY PREDICTION USING '
                                 'CONVOLUTIONAL NEURAL NETWORKS AND WEIGHTED SPATIAL POOLING')
 
-parser.add_argument('--image_path', '-i', type=str, default='img/01.png', help='Path to the input image')
-parser.add_argument('--model_path', '-m', type=str, default='checkpoints/training_48_epochs.pth.tar', help='Path to the model checkpoint')
+parser.add_argument('--image_path', '-i', type=str, default='img/03.png', help='Path to the input image')
+parser.add_argument('--model_path', '-m', type=str, default='checkpoints/Training_29_epochs_best.pth.tar', help='Path to the model checkpoint')
 
 def load_image(image_path: str):
     image = Image.open(image_path).convert('RGB')

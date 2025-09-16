@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import time
+import glob
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,7 @@ from sklearn.metrics import mean_squared_error
 # import pretty_errors
 from torch.utils.tensorboard import SummaryWriter
 # from tensorboardx import SummaryWriter
+from tqdm import tqdm
 
 
 from dataset import Tid2013DataSet, LiveCDataSet, KonIQ10KDataset, CSIQDataSet
@@ -27,11 +29,11 @@ from IQANet import IQANet_DDF_Hyper, TargetNet
 
 parser = argparse.ArgumentParser(description='BLIND NATURAL IMAGE QUALITY PREDICTION USING '
                                 'CONVOLUTIONAL NEURAL NETWORKS AND WEIGHTED SPATIAL POOLING')
-parser.add_argument('--data', default='./Datasets/koniq10k', metavar='DIR',
+parser.add_argument('--data', default='./Datasets/CSIQ', metavar='DIR',
                     help='path to dataset')
 parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
                     help='number of data loading workers (default: 2)')
-parser.add_argument('--epochs', default=50, type=int, metavar='N',
+parser.add_argument('--epochs', default=30, type=int, metavar='N',
                     help='number of total epochs to run (default: 50)')
 parser.add_argument('-b', '--batch-size', default=32, type=int, metavar='N',
                     help='mini-batch size (default: 32), this is the total '
@@ -61,7 +63,7 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                         'multi node data parallel training')
 parser.add_argument('--th', default=0, type=int,
                     help='Use which ones in order file to train (default: 0)')
-parser.add_argument('--train-size', default=8200, type=int, metavar='SIZE',
+parser.add_argument('--train-size', default=694, type=int, metavar='SIZE',
                     help='how many files are used for training (default: 8200)')
 
 parser.add_argument(
@@ -163,9 +165,9 @@ def main():
         args.order_file = '/home/Joanne/Codes/23-py-IQA_DynamicHyper/orders_spaq.csv'
         assert os.path.exists(args.order_file), 'order file not exists, please run generate_order.py'
 
-    if ('csiq' in args.data):
+    if ('csiq' in args.data.lower()):
         # subfolder with images
-        args.images_folder = os.path.join(args.data, 'distored')
+        args.images_folder = os.path.join(args.data, 'dst_imgs')
         assert os.path.exists(args.images_folder), 'images folder not exists'
 
         # subfile with mos detail
@@ -173,7 +175,7 @@ def main():
         assert os.path.exists(args.mos_file), 'MOS file not exists'
 
         # order file
-        args.order_file = '/home/Joanne/Codes/Complex-network-IQA/orders_csiq.csv'
+        args.order_file = 'orders_CSIQ.csv'
         assert os.path.exists(args.order_file), 'order file not exists, please run generate_order.py'
 
     # checkpoints
@@ -298,7 +300,7 @@ def main_worker(gpu, ngpus_per_node, args):
     #                                 batch_size=1, shuffle=False,
     #                                 num_workers=args.workers, pin_memory=True)
 
-    if ('csiq' in args.data):
+    if ('csiq' in args.data.lower()):
         train_dataset = CSIQDataSet(mos_df_train, args.images_folder)
 
         val_loader = Data.DataLoader(dataset=CSIQDataSet(mos_df_test, args.images_folder, False),
@@ -339,15 +341,7 @@ def main_worker(gpu, ngpus_per_node, args):
             if is_best:
                 best_res = res
 
-            if epoch % 2 == 0 or is_best:
-                # save model after training
-                save_checkpoint({
-                    'epoch': epoch + 1,
-                    'state_dict': model.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'best_res': best_res,
-                    'args': args,
-                }, is_best, f'checkpoints/{args.comment}_{epoch}_epochs')
+            save_checkpoint_2(epoch, model.state_dict(), optimizer.state_dict(), is_best, best_res, args)
 
     if writer:
         writer.flush()
@@ -367,7 +361,7 @@ def train(train_loader, model, criterion, optimizer, epoch, writer, args):
     model.train()
 
     end = time.time()
-    for i, (images, target) in enumerate(train_loader):
+    for (images, target) in tqdm(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
 
@@ -411,6 +405,7 @@ def train(train_loader, model, criterion, optimizer, epoch, writer, args):
         end = time.time()
 
     progress.display(epoch, optimizer.param_groups)
+    
     if args.tensorboard:
         to_tensorboard = {'PLCC': result.PLCC, 'SRCC': result.SRCC,
                         'RMSE': result.RMSE, 'LOSS': losses.avg}
@@ -430,7 +425,7 @@ def validate(val_loader, model, criterion, epoch, writer, args):
 
     with torch.no_grad():
         end = time.time()
-        for i, (images, target) in enumerate(val_loader):
+        for (images, target) in tqdm(val_loader):
             # measure data loading time
             data_time.update(time.time() - end)
 
@@ -552,7 +547,7 @@ class ProgressMeter(object):
         if param_groups is not None:
             entries += ["(lr:{})".format('/'.join(['{:.0e}'.format(p['lr'])
                                                 for p in param_groups]))]
-        print(' '.join(entries))
+        print(' '.join(entries), end='\n\n')
 
     def _get_epoch_fmtstr(self, num_epochs):
         num_digits = len(str(num_epochs // 1))
@@ -569,6 +564,30 @@ def save_checkpoint(state, is_best, filename):
     torch.save(state, filename + '.pth.tar')
     if is_best:
         shutil.copyfile(filename + '.pth.tar', filename + '_best.pth.tar')
+
+def save_checkpoint_2(epoch, model_state_dict, optimizer_state_dict, is_best, best_res, args):
+    current_file_name = f'checkpoints/{args.comment}_{epoch}_epochs'
+    
+    state = {
+        'epoch': epoch + 1,
+        'state_dict': model_state_dict,
+        'optimizer': optimizer_state_dict,
+        'best_res': best_res,
+        'args': args,
+    }
+
+    for old in glob.glob(f'checkpoints/{args.comment}_*_epochs.pth.tar'):
+        os.remove(old)
+        
+    torch.save(state, f'{current_file_name}.pth.tar')
+
+    
+    if is_best:
+        for old_best in glob.glob(f'checkpoints/{args.comment}_*_epochs_best.pth.tar'):
+            os.remove(old_best)
+        
+        shutil.copyfile(current_file_name + '.pth.tar', current_file_name + '_best.pth.tar')
+        
 
 
 if __name__ == '__main__':
