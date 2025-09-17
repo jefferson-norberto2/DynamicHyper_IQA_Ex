@@ -336,12 +336,12 @@ def main_worker(gpu, ngpus_per_node, args):
         loss, res = validate(val_loader, model, criterion, epoch, writer, args)
         scheduler.step(loss)
        
-        if gpu == 0:
-            is_best = res[0] > best_res[0]
-            if is_best:
-                best_res = res
+        is_best = res[0] > best_res[0]
+        
+        if is_best:
+            best_res = res
 
-            save_checkpoint_2(epoch, model.state_dict(), optimizer.state_dict(), is_best, best_res, args)
+        save_checkpoint_2(epoch, model.state_dict(), optimizer.state_dict(), is_best, best_res, args)
 
     if writer:
         writer.flush()
@@ -566,6 +566,7 @@ def save_checkpoint(state, is_best, filename):
         shutil.copyfile(filename + '.pth.tar', filename + '_best.pth.tar')
 
 def save_checkpoint_2(epoch, model_state_dict, optimizer_state_dict, is_best, best_res, args):
+    
     current_file_name = f'checkpoints/{args.comment}_{epoch}_epochs'
     
     state = {
@@ -577,18 +578,13 @@ def save_checkpoint_2(epoch, model_state_dict, optimizer_state_dict, is_best, be
     }
 
     for old in glob.glob(f'checkpoints/{args.comment}_*_epochs.pth.tar'):
-        print("Encontrei os arquivos:", old)
-        if old != f'{current_file_name}.pth.tar':
-            os.remove(old)
+        os.remove(old)
         
     torch.save(state, f'{current_file_name}.pth.tar')
-
     
     if is_best:
         for old_best in glob.glob(f'checkpoints/{args.comment}_*_epochs_best.pth.tar'):
-            print("Encontrei os arquivos:", old)
-            if old != f'{current_file_name}_best.pth.tar':
-                os.remove(old_best)
+            os.remove(old_best)
         
         shutil.copyfile(current_file_name + '.pth.tar', current_file_name + '_best.pth.tar')
         
