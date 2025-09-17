@@ -577,14 +577,18 @@ def save_checkpoint_2(epoch, model_state_dict, optimizer_state_dict, is_best, be
     }
 
     for old in glob.glob(f'checkpoints/{args.comment}_*_epochs.pth.tar'):
-        os.remove(old)
+        print("Encontrei os arquivos:", old)
+        if old != f'{current_file_name}.pth.tar':
+            os.remove(old)
         
     torch.save(state, f'{current_file_name}.pth.tar')
 
     
     if is_best:
         for old_best in glob.glob(f'checkpoints/{args.comment}_*_epochs_best.pth.tar'):
-            os.remove(old_best)
+            print("Encontrei os arquivos:", old)
+            if old != f'{current_file_name}_best.pth.tar':
+                os.remove(old_best)
         
         shutil.copyfile(current_file_name + '.pth.tar', current_file_name + '_best.pth.tar')
         
