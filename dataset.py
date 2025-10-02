@@ -57,7 +57,7 @@ class KonIQ10KDataset(Dataset):
                                 mos_detail.c3, mos_detail.c4, mos_detail.c5)
             label = tuple([m/mos_detail.c_total for m in mos_distribution])
         else:
-            label = [(mos_detail.MOS -1) / 4]
+            label = [(mos_detail.MOS - 1) / 4]
         return image, torch.Tensor(label)
 
 

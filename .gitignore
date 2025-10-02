@@ -7,3 +7,5 @@ __pycache__
 runs
 checkpoints
 .vscode/
+old_runs/
+wandb/

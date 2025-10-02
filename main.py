@@ -21,6 +21,7 @@ from torch.utils.tensorboard import SummaryWriter
 # from tensorboardx import SummaryWriter
 from tqdm import tqdm
 
+import wandb
 
 from dataset import Tid2013DataSet, LiveCDataSet, KonIQ10KDataset, CSIQDataSet
 from huberloss import HuberLoss
@@ -192,7 +193,7 @@ def main():
         mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
         # Simply call main_worker function
-        main_worker(0, ngpus_per_node, args)
+        main_worker(2, ngpus_per_node, args)
 
 
 def main_worker(gpu, ngpus_per_node, args):
@@ -200,6 +201,18 @@ def main_worker(gpu, ngpus_per_node, args):
 
     if args.tensorboard:
         # Tensorboard Writer
+        wandb.init(
+        project="DynamicIQA", 
+        sync_tensorboard=True, 
+        name=f'Network with Sigmoid',
+        mode='online',
+        config={
+        "learning_rate": args.lr,
+        "architecture": 'resnet',
+        "dataset": 'koniq10k',
+        "epochs": args.epochs,
+        })
+
         writer = SummaryWriter(os.path.join('runs', args.timestep + args.comment))
     else:
         writer = None
@@ -226,6 +239,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     torch.cuda.set_device(gpu)
     model.cuda(gpu)
+
     if args.multiprocessing_distributed:
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[gpu])
 
@@ -324,6 +338,10 @@ def main_worker(gpu, ngpus_per_node, args):
         return
 
     best_res = (0, 0, 0)
+
+    print('Starting train')
+    
+    
     for epoch in range(args.epochs):
         if args.multiprocessing_distributed:
             train_sampler.set_epoch(epoch)
@@ -346,7 +364,7 @@ def main_worker(gpu, ngpus_per_node, args):
     if writer:
         writer.flush()
         writer.close()
-
+        wandb.finish()
 
 def train(train_loader, model, criterion, optimizer, epoch, writer, args):
 # def train(train_loader, model, criterion, optimizer,scheduler, epoch, writer, args):
